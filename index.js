@@ -61,20 +61,17 @@ async function run() {
 
     app.get("/assignments", async (req, res) => {
       const result = await assignmentsCollection.find().toArray();
-
       res.send(result);
     });
 
      app.post("/assignment", async (req, res) => {
        const assignmentData = req.body;
-
        const result = await assignmentsCollection.insertOne(assignmentData);
        res.send(result);
      });
 
   } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
+
   }
 }
 run().catch(console.dir);
