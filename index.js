@@ -52,22 +52,32 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
 
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
-
     const assignmentsCollection = client.db("studyMate").collection("assignments");
+
+    
+    app.post("/assignment", async (req, res) => {
+      const assignmentData = req.body;
+      const result = await assignmentsCollection.insertOne(assignmentData);
+      res.send(result);
+    });
 
     app.get("/assignments", async (req, res) => {
       const result = await assignmentsCollection.find().toArray();
       res.send(result);
     });
 
-     app.post("/assignment", async (req, res) => {
-       const assignmentData = req.body;
-       const result = await assignmentsCollection.insertOne(assignmentData);
-       res.send(result);
+    app.get("/assignment/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await assignmentsCollection.findOne(query);
+      res.send(result);
+    });
+
+     app.delete("/assignment/:id",async(req,res)=>{
+      const id = req.params.id;
+      const query={_id:new ObjectId(id)}
+      const result = await assignmentsCollection.deleteOne(query);
+      res.send(result)
      });
 
   } finally {
