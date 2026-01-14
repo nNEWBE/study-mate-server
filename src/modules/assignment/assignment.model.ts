@@ -5,7 +5,8 @@ const assignmentSchema = new Schema<TAssignment>({
     title: { type: String, required: true },
     description: { type: String, required: true },
     marks: { type: Number, required: true },
-    thumbnailUrl: { type: String, required: true },
+    content: { type: String, required: true },
+    thumbnailUrl: { type: [String], required: true },
     difficulty: { type: String, enum: ['easy', 'medium', 'hard'], required: true },
     dueDate: { type: Date, required: true },
     createdBy: {

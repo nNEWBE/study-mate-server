@@ -16,6 +16,6 @@ router.patch('/update-user/:id',
     parseBody, validateRequest(UserValidations.updateUserValidationSchema), UserController.updateUser)
 
 router.patch('/change-status/:id', validateRequest(UserValidations.blockUserValidationSchema), UserController.blockUser)
-router.get('/me', auth(USER_ROLE.admin, USER_ROLE.user), UserController.getMe)
+router.get('/me', auth(USER_ROLE.admin, USER_ROLE.student, USER_ROLE.teacher), UserController.getMe)
 
 export const UserRoutes = router

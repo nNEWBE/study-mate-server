@@ -1,13 +1,14 @@
 import express from 'express';
 import { AssignmentControllers } from './assignment.controller';
 import auth from '../../middlewares/auth';
+import { USER_ROLE } from '../user/user.constant';
 
 const router = express.Router();
 
-router.post('/assignment', auth, AssignmentControllers.createAssignment);
-router.get('/assignments', AssignmentControllers.getAllAssignments);
-router.get('/assignment/:id', auth, AssignmentControllers.getSingleAssignment);
-router.delete('/assignment/:id', auth, AssignmentControllers.deleteAssignment);
-router.put('/assignment/:id', auth, AssignmentControllers.updateAssignment);
+router.post('/', auth(USER_ROLE.student, USER_ROLE.teacher), AssignmentControllers.createAssignment);
+router.get('/', AssignmentControllers.getAllAssignments);
+router.get('/:id', auth(USER_ROLE.student, USER_ROLE.teacher), AssignmentControllers.getSingleAssignment);
+router.delete('/:id', auth(USER_ROLE.student, USER_ROLE.teacher), AssignmentControllers.deleteAssignment);
+router.put('/:id', auth(USER_ROLE.student, USER_ROLE.teacher), AssignmentControllers.updateAssignment);
 
 export const AssignmentRoutes = router;
