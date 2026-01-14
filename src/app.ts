@@ -45,7 +45,7 @@ app.use(mongoSanitize());
 // Security: Prevent HTTP Parameter Pollution
 app.use(hpp());
 
-app.use('/', router);
+app.use('/api/v1', router);
 app.get('/', (req, res) => {
     res.send('Study Mate is running');
 })
