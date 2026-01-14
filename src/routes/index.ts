@@ -3,6 +3,7 @@ import { AssignmentRoutes } from "../modules/assignment/assignment.route";
 import { AuthRoutes } from "../modules/auth/auth.route";
 import { UserRoutes } from "../modules/user/user.route";
 import { SubmissionRoutes } from "../modules/submission/submission.route";
+import { CategoryRoutes } from "../modules/category/category.route";
 
 const router = Router();
 
@@ -22,6 +23,10 @@ const moduleRoutes = [
     {
         path: '/submission',
         router: SubmissionRoutes
+    },
+    {
+        path: '/category',
+        router: CategoryRoutes
     }
 ];
 

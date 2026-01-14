@@ -12,11 +12,6 @@ const createSubmission = catchAsync(async (req, res) => {
         studentEmail: user.email,
     };
 
-    // If name is not in token payload, you might want to fetch user details or require name in body.
-    // For now assuming it is or ignoring if not strictly required by schema (it is required).
-    // Let's assume frontend sends studentName or we fetch it.
-    // Better: let's rely on req.body for studentName if not in token.
-
     const result = await SubmissionServices.createSubmission(req.body);
 
     sendResponse(res, {
