@@ -15,7 +15,7 @@ const createAssignment = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllAssignments = catchAsync(async (req: Request, res: Response) => {
-    const result = await AssignmentServices.getAllAssignments();
+    const result = await AssignmentServices.getAllAssignments(req.query);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,

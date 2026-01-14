@@ -6,8 +6,17 @@ const createSubmission = async (payload: TSubmission) => {
     return result;
 };
 
-const getAllSubmissions = async () => {
-    const result = await Submission.find();
+import QueryBuilder from "../../builder/QueryBuilder";
+
+const getAllSubmissions = async (query: Record<string, unknown>) => {
+    const submissionQuery = new QueryBuilder(Submission.find(), query)
+        .search(['assignmentTitle', 'studentName', 'studentEmail'])
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+
+    const result = await submissionQuery.modelQuery;
     return result;
 };
 

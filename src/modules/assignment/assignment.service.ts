@@ -6,8 +6,17 @@ const createAssignment = async (payload: TAssignment) => {
     return result;
 };
 
-const getAllAssignments = async () => {
-    const result = await Assignment.find();
+import QueryBuilder from "../../builder/QueryBuilder";
+
+const getAllAssignments = async (query: Record<string, unknown>) => {
+    const assignmentQuery = new QueryBuilder(Assignment.find(), query)
+        .search(['title', 'description'])
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+
+    const result = await assignmentQuery.modelQuery;
     return result;
 };
 

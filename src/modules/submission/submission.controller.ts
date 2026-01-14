@@ -23,7 +23,7 @@ const createSubmission = catchAsync(async (req, res) => {
 });
 
 const getAllSubmissions = catchAsync(async (req, res) => {
-    const result = await SubmissionServices.getAllSubmissions();
+    const result = await SubmissionServices.getAllSubmissions(req.query);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,

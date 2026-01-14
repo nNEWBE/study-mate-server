@@ -6,8 +6,17 @@ const createCategory = async (payload: TCategory) => {
     return result;
 };
 
-const getAllCategories = async () => {
-    const result = await Category.find({ isDeleted: false });
+import QueryBuilder from "../../builder/QueryBuilder";
+
+const getAllCategories = async (query: Record<string, unknown>) => {
+    const categoryQuery = new QueryBuilder(Category.find({ isDeleted: false }), query)
+        .search(['name'])
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+
+    const result = await categoryQuery.modelQuery;
     return result;
 };
 

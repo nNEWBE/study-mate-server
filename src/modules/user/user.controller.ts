@@ -5,7 +5,7 @@ import { UserServices } from "./user.service";
 import { IImageFile } from "../../interface/ImageFile";
 
 const getAllUsers = catchAsync(async (req, res) => {
-    const result = await UserServices.getAllUsersFromDB();
+    const result = await UserServices.getAllUsersFromDB(req.query);
     sendResponse(res, {
         success: true,
         message: 'Users fetched successfully',

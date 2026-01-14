@@ -49,4 +49,8 @@ const submissionSchema = new Schema<TSubmission>({
     timestamps: true,
 });
 
+submissionSchema.index({ assignmentId: 1 });
+submissionSchema.index({ studentEmail: 1 });
+submissionSchema.index({ status: 1 });
+
 export const Submission = model<TSubmission>('Submission', submissionSchema);

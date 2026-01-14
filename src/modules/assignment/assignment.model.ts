@@ -17,4 +17,8 @@ const assignmentSchema = new Schema<TAssignment>({
     timestamps: true,
 });
 
+assignmentSchema.index({ difficulty: 1 });
+assignmentSchema.index({ "createdBy.email": 1 });
+assignmentSchema.index({ dueDate: 1 });
+
 export const Assignment = model<TAssignment>('Assignment', assignmentSchema);

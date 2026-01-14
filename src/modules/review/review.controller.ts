@@ -19,7 +19,7 @@ const createReview = catchAsync(async (req, res) => {
 });
 
 const getAllReviews = catchAsync(async (req, res) => {
-    const result = await ReviewServices.getAllReviews();
+    const result = await ReviewServices.getAllReviews(req.query);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,

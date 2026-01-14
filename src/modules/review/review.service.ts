@@ -6,8 +6,17 @@ const createReview = async (payload: TReview) => {
     return result;
 };
 
-const getAllReviews = async () => {
-    const result = await Review.find().populate('user', 'name email profileImage');
+import QueryBuilder from "../../builder/QueryBuilder";
+
+const getAllReviews = async (query: Record<string, unknown>) => {
+    const reviewQuery = new QueryBuilder(Review.find().populate('user', 'name email profileImage'), query)
+        .search(['feedback']) // optional: search reviews by content
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+
+    const result = await reviewQuery.modelQuery;
     return result;
 };
 

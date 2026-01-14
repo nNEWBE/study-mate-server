@@ -2,8 +2,17 @@ import { IImageFile } from "../../interface/ImageFile";
 import { User } from "./user.model";
 import { checkBlockUser, isUserExistsAndNotBlocked } from "./user.utils";
 
-const getAllUsersFromDB = async () => {
-    const result = await User.find();
+import QueryBuilder from "../../builder/QueryBuilder";
+
+const getAllUsersFromDB = async (query: Record<string, unknown>) => {
+    const userQuery = new QueryBuilder(User.find(), query)
+        .search(['name', 'email'])
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+
+    const result = await userQuery.modelQuery;
     return result;
 };
 
