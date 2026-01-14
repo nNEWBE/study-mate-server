@@ -16,4 +16,5 @@ export type TAssignment = {
         profileImage?: string;
     };
     userId?: Types.ObjectId;
+    categoryId: Types.ObjectId;
 };

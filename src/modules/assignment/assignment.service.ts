@@ -4,8 +4,17 @@ import { uploadToCloudinary } from "../../utils/cloudinary";
 import { IImageFile } from "../../interface/ImageFile";
 import QueryBuilder from "../../builder/QueryBuilder";
 import { JwtPayload } from "jsonwebtoken";
+import { Category } from "../category/category.model";
+import AppError from "../../errors/AppError";
+import httpStatus from "http-status";
 
 const createAssignment = async (payload: TAssignment, files?: IImageFile[], user?: JwtPayload) => {
+    // Check if category exists
+    const category = await Category.findOne({ _id: payload.categoryId, isDeleted: false });
+    if (!category) {
+        throw new AppError('categoryId', httpStatus.BAD_REQUEST, 'Category not found. Please select a valid category.');
+    }
+
     const thumbnailUrls: string[] = [];
     if (files && files.length > 0) {
         for (const file of files) {
@@ -24,7 +33,7 @@ const createAssignment = async (payload: TAssignment, files?: IImageFile[], user
 
 
 const getAllAssignments = async (query: Record<string, unknown>) => {
-    const assignmentQuery = new QueryBuilder(Assignment.find(), query)
+    const assignmentQuery = new QueryBuilder(Assignment.find().populate('categoryId'), query)
         .search(['title', 'description'])
         .filter()
         .sort()
@@ -36,7 +45,7 @@ const getAllAssignments = async (query: Record<string, unknown>) => {
 };
 
 const getSingleAssignment = async (id: string) => {
-    const result = await Assignment.findById(id);
+    const result = await Assignment.findById(id).populate('categoryId');
     return result;
 };
 

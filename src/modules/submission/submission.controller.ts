@@ -2,17 +2,22 @@ import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { SubmissionServices } from "./submission.service";
+import { User } from "../user/user.model";
 
 const createSubmission = catchAsync(async (req, res) => {
     const { user } = req;
+
+    // Fetch user details from DB to get name
+    const userDetails = await User.findById(user._id);
+
     const body = {
         ...req.body,
         studentId: user._id,
-        studentName: user.name, // Assuming name is on token, otherwise fetch from DB
+        studentName: userDetails?.name || 'Unknown',
         studentEmail: user.email,
     };
 
-    const result = await SubmissionServices.createSubmission(req.body);
+    const result = await SubmissionServices.createSubmission(body);
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,

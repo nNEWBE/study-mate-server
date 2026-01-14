@@ -1,12 +1,12 @@
 import { Submission } from "./submission.model";
 import { TSubmission } from "./submission.interface";
+import QueryBuilder from "../../builder/QueryBuilder";
 
 const createSubmission = async (payload: TSubmission) => {
     const result = await Submission.create(payload);
     return result;
 };
 
-import QueryBuilder from "../../builder/QueryBuilder";
 
 const getAllSubmissions = async (query: Record<string, unknown>) => {
     const submissionQuery = new QueryBuilder(Submission.find(), query)

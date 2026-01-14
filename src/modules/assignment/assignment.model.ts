@@ -13,9 +13,10 @@ const assignmentSchema = new Schema<TAssignment>({
         name: { type: String, required: true },
         email: { type: String, required: true },
         role: { type: String, required: true },
-        profileImage: { type: String }
+        profileImage: { type: String, required: true }
     },
-    userId: { type: Schema.Types.ObjectId, ref: 'User' }
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true }
 }, {
     timestamps: true,
 });

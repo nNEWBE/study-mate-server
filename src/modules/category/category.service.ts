@@ -2,6 +2,10 @@ import { Category } from './category.model';
 import { TCategory } from './category.interface';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { IImageFile } from '../../interface/ImageFile';
+import QueryBuilder from "../../builder/QueryBuilder";
+import { Assignment } from '../assignment/assignment.model';
+import AppError from '../../errors/AppError';
+import httpStatus from 'http-status';
 
 const createCategory = async (payload: TCategory, file?: IImageFile) => {
     // Upload image to Cloudinary if provided
@@ -13,8 +17,6 @@ const createCategory = async (payload: TCategory, file?: IImageFile) => {
     const result = await Category.create(payload);
     return result;
 };
-
-import QueryBuilder from "../../builder/QueryBuilder";
 
 const getAllCategories = async (query: Record<string, unknown>) => {
     const categoryQuery = new QueryBuilder(Category.find({ isDeleted: false }), query)
@@ -45,6 +47,17 @@ const updateCategory = async (id: string, payload: Partial<TCategory>, file?: II
 };
 
 const deleteCategory = async (id: string) => {
+    // Check if any assignments are using this category
+    const assignmentsCount = await Assignment.countDocuments({ categoryId: id });
+
+    if (assignmentsCount > 0) {
+        throw new AppError(
+            'categoryId',
+            httpStatus.BAD_REQUEST,
+            `Cannot delete category. There are ${assignmentsCount} assignment(s) using this category. Please delete or reassign the assignments first.`
+        );
+    }
+
     const result = await Category.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
     return result;
 };

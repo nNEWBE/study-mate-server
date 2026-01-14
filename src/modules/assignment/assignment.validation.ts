@@ -14,6 +14,7 @@ const createAssignmentValidationSchema = z.object({
             role: z.string(),
             profileImage: z.string().optional(),
         }),
+        categoryId: z.string(),
     }),
 });
 
