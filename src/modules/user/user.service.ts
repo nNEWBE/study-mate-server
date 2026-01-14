@@ -1,6 +1,7 @@
 import { IImageFile } from "../../interface/ImageFile";
 import { User } from "./user.model";
 import { checkBlockUser, isUserExistsAndNotBlocked } from "./user.utils";
+import { uploadToCloudinary } from "../../utils/cloudinary";
 
 import QueryBuilder from "../../builder/QueryBuilder";
 
@@ -20,7 +21,9 @@ const updateUserFromDB = async (id: string, body: Record<string, unknown>, file:
     const user = await User.isUserExistsById(id);
     isUserExistsAndNotBlocked(user);
     if (file && file.path) {
-        body.profileImage = file.path;
+        // Upload to Cloudinary and get URL
+        const cloudinaryUrl = await uploadToCloudinary(file.path, 'study-mate/profiles');
+        body.profileImage = cloudinaryUrl;
     }
     const result = await User.findByIdAndUpdate(id, body, { new: true, runValidators: true });
     return result;

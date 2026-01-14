@@ -3,10 +3,12 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import config from "../../config";
+import { IImageFile } from "../../interface/ImageFile";
 
 const registerUser = catchAsync(async (req, res) => {
     const { name, email, password } = req.body;
-    const result = await AuthServices.regsiterUserIntoDB(name, email, password);
+    const file = req.file as IImageFile | undefined;
+    const result = await AuthServices.regsiterUserIntoDB(name, email, password, file);
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.CREATED,

@@ -3,11 +3,15 @@ import { AuthControllers } from './auth.controller';
 import validateRequest from '../../middlewares/validateRequest';
 import { AuthValidation } from './auth.validation';
 import { UserValidations } from '../user/user.validation';
+import { multerUpload } from '../../utils/multerUpload';
+import { parseBody } from '../../middlewares/bodyParser';
 
 const router = express.Router();
 
 router.post(
     '/register',
+    multerUpload.single('profileImage'),
+    parseBody,
     validateRequest(UserValidations.registerUserValidationSchema),
     AuthControllers.registerUser
 );

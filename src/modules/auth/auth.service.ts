@@ -4,8 +4,10 @@ import { User } from "../user/user.model"
 import config from "../../config";
 import { createToken, verifyToken } from "./auth.utils";
 import { isUserExistsAndNotBlocked } from "../user/user.utils";
+import { uploadToCloudinary } from "../../utils/cloudinary";
+import { IImageFile } from "../../interface/ImageFile";
 
-const regsiterUserIntoDB = async (name: string, email: string, password: string) => {
+const regsiterUserIntoDB = async (name: string, email: string, password: string, file?: IImageFile) => {
     const isEmailExist = await User.isUserExistsByEmail(email);
     if (isEmailExist) {
         throw new AppError('email',
@@ -13,10 +15,17 @@ const regsiterUserIntoDB = async (name: string, email: string, password: string)
             `${email} already exists!`,
         );
     }
+
+    let profileImage: string | undefined;
+    if (file && file.path) {
+        profileImage = await uploadToCloudinary(file.path, 'study-mate/profiles');
+    }
+
     const result = User.create({
         name,
         email,
-        password
+        password,
+        ...(profileImage && { profileImage })
     })
 
     return result;

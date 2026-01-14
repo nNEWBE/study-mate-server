@@ -15,21 +15,26 @@
                         "method": "POST",
                         "header": [],
                         "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"profileImage\": \"https://example.com/image.jpg\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "data",
+                                    "value": "{\"name\": \"Test User\", \"email\": \"test@example.com\", \"password\": \"password123\"}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "profileImage",
+                                    "type": "file",
+                                    "src": ""
                                 }
-                            }
+                            ]
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/auth/register",
+                            "raw": "{{baseUrl}}/register",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "auth",
                                 "register"
                             ]
                         }
@@ -769,21 +774,28 @@
                             }
                         ],
                         "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"New Name\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "data",
+                                    "value": "{\"name\": \"New Name\"}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "profileImage",
+                                    "type": "file",
+                                    "src": ""
                                 }
-                            }
+                            ]
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/user/:id",
+                            "raw": "{{baseUrl}}/user/update-user/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "user",
+                                "update-user",
                                 ":id"
                             ],
                             "variable": [
