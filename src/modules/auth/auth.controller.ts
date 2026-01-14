@@ -1,44 +1,82 @@
-import { Request, Response } from "express";
-import config from "../../config";
-import jwt from "jsonwebtoken";
+import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import httpStatus from "http-status";
+import { AuthServices } from "./auth.service";
+import config from "../../config";
 
-const login = catchAsync(async (req: Request, res: Response) => {
-    const user = req.body;
-    const token = jwt.sign(user, config.jwt_access_secret as string, { expiresIn: '1h' });
-
-    res
-        .cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        })
-        .status(httpStatus.OK)
-        .json({
-            success: true,
-            message: 'Login successful',
-            token
-        });
+const registerUser = catchAsync(async (req, res) => {
+    const { name, email, password } = req.body;
+    const result = await AuthServices.regsiterUserIntoDB(name, email, password);
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.CREATED,
+        message: 'User registered successfully',
+        data: {
+            _id: result._id,
+            name: result.name,
+            email: result.email
+        },
+    });
 });
 
-const logout = catchAsync(async (req: Request, res: Response) => {
-    res
-        .clearCookie('token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 0,
-        })
-        .status(httpStatus.OK)
-        .json({
-            success: true,
-            message: 'Logout successful'
-        });
+const loginUser = catchAsync(async (req, res) => {
+    const { email, password } = req.body;
+    const { accessToken, refreshToken } = await AuthServices.loginUserIntoDB(email, password);
+
+    res.cookie('refreshToken', refreshToken, {
+        secure: config.node_env === 'production',
+        httpOnly: true,
+        sameSite: 'none',
+        maxAge: Number(config.cookies_max_age),
+    });
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'Login successful',
+        data: {
+            token: {
+                accessToken,
+            }
+        }
+    });
+})
+
+const logoutUser = catchAsync(async (req, res) => {
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: config.node_env === "production",
+        sameSite: "none",
+    });
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Logout successful",
+        data: null,
+    });
+
+});
+
+const refreshToken = catchAsync(async (req, res) => {
+    const { refreshToken } = req.cookies;
+    const { accessToken } = await AuthServices.refreshToken(refreshToken);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Access token is retrieved succesfully!',
+        data: {
+            token: {
+                accessToken,
+            }
+        }
+    });
 });
 
 export const AuthControllers = {
-    login,
-    logout
+    registerUser,
+    loginUser,
+    logoutUser,
+    refreshToken
 };
