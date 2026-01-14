@@ -5,6 +5,7 @@ import { UserRoutes } from "../modules/user/user.route";
 import { SubmissionRoutes } from "../modules/submission/submission.route";
 import { CategoryRoutes } from "../modules/category/category.route";
 import { WishlistRoutes } from "../modules/wishlist/wishlist.route";
+import { ReviewRoutes } from "../modules/review/review.route";
 
 const router = Router();
 
@@ -32,6 +33,10 @@ const moduleRoutes = [
     {
         path: '/wishlist',
         router: WishlistRoutes
+    },
+    {
+        path: '/review',
+        router: ReviewRoutes
     }
 ];
 
