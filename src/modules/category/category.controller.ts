@@ -2,9 +2,11 @@ import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { CategoryServices } from './category.service';
+import { IImageFile } from '../../interface/ImageFile';
 
 const createCategory = catchAsync(async (req, res) => {
-    const result = await CategoryServices.createCategory(req.body);
+    const file = req.file as IImageFile | undefined;
+    const result = await CategoryServices.createCategory(req.body, file);
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
         success: true,
@@ -36,7 +38,8 @@ const getSingleCategory = catchAsync(async (req, res) => {
 
 const updateCategory = catchAsync(async (req, res) => {
     const { id } = req.params;
-    const result = await CategoryServices.updateCategory(id as string, req.body);
+    const file = req.file as IImageFile | undefined;
+    const result = await CategoryServices.updateCategory(id as string, req.body, file);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,

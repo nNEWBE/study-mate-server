@@ -1,7 +1,15 @@
 import { Category } from './category.model';
 import { TCategory } from './category.interface';
+import { uploadToCloudinary } from '../../utils/cloudinary';
+import { IImageFile } from '../../interface/ImageFile';
 
-const createCategory = async (payload: TCategory) => {
+const createCategory = async (payload: TCategory, file?: IImageFile) => {
+    // Upload image to Cloudinary if provided
+    if (file && file.path) {
+        const imageUrl = await uploadToCloudinary(file.path, 'study-mate/categories');
+        payload.imageUrl = imageUrl;
+    }
+
     const result = await Category.create(payload);
     return result;
 };
@@ -25,7 +33,13 @@ const getSingleCategory = async (id: string) => {
     return result;
 };
 
-const updateCategory = async (id: string, payload: Partial<TCategory>) => {
+const updateCategory = async (id: string, payload: Partial<TCategory>, file?: IImageFile) => {
+    // Upload new image to Cloudinary if provided
+    if (file && file.path) {
+        const imageUrl = await uploadToCloudinary(file.path, 'study-mate/categories');
+        payload.imageUrl = imageUrl;
+    }
+
     const result = await Category.findByIdAndUpdate(id, payload, { new: true });
     return result;
 };

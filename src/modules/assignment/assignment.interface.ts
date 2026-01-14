@@ -1,4 +1,6 @@
 
+import { Types } from "mongoose";
+
 export type TAssignment = {
     title: string;
     description: string;
@@ -8,7 +10,10 @@ export type TAssignment = {
     difficulty: 'easy' | 'medium' | 'hard';
     dueDate: Date;
     createdBy: {
-        email: string;
         name: string;
+        email: string;
+        role: string;
+        profileImage?: string;
     };
+    userId?: Types.ObjectId;
 };

@@ -3,9 +3,12 @@ import catchAsync from "../../utils/catchAsync";
 import { AssignmentServices } from "./assignment.service";
 import sendResponse from "../../utils/sendResponse";
 import httpStatus from "http-status";
+import { IImageFile } from "../../interface/ImageFile";
 
 const createAssignment = catchAsync(async (req: Request, res: Response) => {
-    const result = await AssignmentServices.createAssignment(req.body);
+    const files = req.files as IImageFile[] | undefined;
+    const user = req.user;
+    const result = await AssignmentServices.createAssignment(req.body, files, user);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -51,7 +54,8 @@ const deleteAssignment = catchAsync(async (req: Request, res: Response) => {
 const updateAssignment = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     if (!id) throw new Error("ID is required");
-    const result = await AssignmentServices.updateAssignment(id, req.body);
+    const files = req.files as IImageFile[] | undefined;
+    const result = await AssignmentServices.updateAssignment(id, req.body, files);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,

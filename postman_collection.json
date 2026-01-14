@@ -125,18 +125,24 @@
                         "header": [
                             {
                                 "key": "Authorization",
-                                "value": "{{accessToken}}",
+                                "value": "Bearer {{accessToken}}",
                                 "type": "text"
                             }
                         ],
                         "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"title\": \"Advanced TS\",\n    \"description\": \"Learn advanced typescript features\",\n    \"marks\": 60,\n    \"content\": \"# Markdown content\",\n    \"thumbnailUrl\": [\"https://example.com/thumb.jpg\"],\n    \"difficulty\": \"medium\",\n    \"dueDate\": \"2024-12-31\",\n    \"createdBy\": {\n        \"email\": \"teacher@example.com\",\n        \"name\": \"Teacher Name\"\n    }\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "data",
+                                    "value": "{\"title\": \"Advanced TS\", \"description\": \"Learn advanced typescript features\", \"marks\": 60, \"content\": \"# Markdown content\", \"difficulty\": \"medium\", \"dueDate\": \"2024-12-31\", \"createdBy\": {\"name\": \"Teacher Name\", \"email\": \"teacher@example.com\", \"role\": \"teacher\", \"profileImage\": \"\"}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "thumbnails",
+                                    "type": "file",
+                                    "src": ""
                                 }
-                            }
+                            ]
                         },
                         "url": {
                             "raw": "{{baseUrl}}/assignment",
@@ -455,18 +461,24 @@
                         "header": [
                             {
                                 "key": "Authorization",
-                                "value": "{{accessToken}}",
+                                "value": "Bearer {{accessToken}}",
                                 "type": "text"
                             }
                         ],
                         "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Web Development\",\n    \"imageUrl\": \"https://example.com/web.png\",\n    \"color\": \"#FF5733\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "data",
+                                    "value": "{\"name\": \"Web Development\", \"color\": \"#FF5733\"}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": ""
                                 }
-                            }
+                            ]
                         },
                         "url": {
                             "raw": "{{baseUrl}}/category",
@@ -504,18 +516,24 @@
                         "header": [
                             {
                                 "key": "Authorization",
-                                "value": "{{accessToken}}",
+                                "value": "Bearer {{accessToken}}",
                                 "type": "text"
                             }
                         ],
                         "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Frontend Development\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "data",
+                                    "value": "{\"name\": \"Frontend Development\"}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": ""
                                 }
-                            }
+                            ]
                         },
                         "url": {
                             "raw": "{{baseUrl}}/category/:id",

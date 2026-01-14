@@ -10,9 +10,12 @@ const assignmentSchema = new Schema<TAssignment>({
     difficulty: { type: String, enum: ['easy', 'medium', 'hard'], required: true },
     dueDate: { type: Date, required: true },
     createdBy: {
+        name: { type: String, required: true },
         email: { type: String, required: true },
-        name: { type: String, required: true }
-    }
+        role: { type: String, required: true },
+        profileImage: { type: String }
+    },
+    userId: { type: Schema.Types.ObjectId, ref: 'User' }
 }, {
     timestamps: true,
 });

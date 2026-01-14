@@ -1,12 +1,27 @@
 import { Assignment } from "./assignment.model";
 import type { TAssignment } from "./assignment.interface";
+import { uploadToCloudinary } from "../../utils/cloudinary";
+import { IImageFile } from "../../interface/ImageFile";
+import QueryBuilder from "../../builder/QueryBuilder";
+import { JwtPayload } from "jsonwebtoken";
 
-const createAssignment = async (payload: TAssignment) => {
-    const result = await Assignment.create(payload);
+const createAssignment = async (payload: TAssignment, files?: IImageFile[], user?: JwtPayload) => {
+    const thumbnailUrls: string[] = [];
+    if (files && files.length > 0) {
+        for (const file of files) {
+            const url = await uploadToCloudinary(file.path, 'study-mate/assignments');
+            thumbnailUrls.push(url);
+        }
+    }
+
+    const result = await Assignment.create({
+        ...payload,
+        thumbnailUrl: thumbnailUrls,
+        userId: user?._id,
+    });
     return result;
 };
 
-import QueryBuilder from "../../builder/QueryBuilder";
 
 const getAllAssignments = async (query: Record<string, unknown>) => {
     const assignmentQuery = new QueryBuilder(Assignment.find(), query)
@@ -30,8 +45,20 @@ const deleteAssignment = async (id: string) => {
     return result;
 };
 
-const updateAssignment = async (id: string, payload: Partial<TAssignment>) => {
-    const result = await Assignment.findByIdAndUpdate(id, payload, { new: true, upsert: true });
+const updateAssignment = async (id: string, payload: Partial<TAssignment>, files?: IImageFile[]) => {
+    if (files && files.length > 0) {
+        const thumbnailUrls: string[] = [];
+        for (const file of files) {
+            const url = await uploadToCloudinary(file.path, 'study-mate/assignments');
+            thumbnailUrls.push(url);
+        }
+        payload.thumbnailUrl = thumbnailUrls;
+    }
+
+    // Remove protected fields from update payload
+    const { createdBy, ...safePayload } = payload as any;
+
+    const result = await Assignment.findByIdAndUpdate(id, safePayload, { new: true, upsert: true });
     return result;
 };
 

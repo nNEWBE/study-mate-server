@@ -39,6 +39,7 @@ const loginUser = catchAsync(async (req, res) => {
         data: {
             token: {
                 accessToken,
+                refreshToken
             }
         }
     });

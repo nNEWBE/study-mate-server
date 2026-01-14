@@ -9,10 +9,17 @@ import status from 'http-status';
 
 const auth = (...requiredRoles: TUserRole[]) => {
     return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        let token = req.headers.authorization;
+        const authHeader = req.headers.authorization;
+        let token: string | undefined;
+
+        // Extract token from Bearer header
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.split(' ')[1];
+        }
 
         const cookies = (req as any).cookies;
 
+        // Fallback to refresh token from cookies if no Bearer token
         if (!token) {
             token = cookies?.refreshToken;
         }
@@ -23,15 +30,15 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
         try {
             const secret =
-                cookies?.refreshToken && !req.headers.authorization
+                cookies?.refreshToken && !authHeader
                     ? config.jwt_refresh_secret
                     : config.jwt_access_secret;
 
             const decoded = jwt.verify(token, secret as string) as JwtPayload;
 
-            const { role, email } = decoded;
+            const { role, userId } = decoded;
 
-            const user = await User.findOne({ email, role, isBlocked: false });
+            const user = await User.findOne({ email: userId, isBlocked: false });
 
             if (!user) {
                 throw new AppError('auth', status.NOT_FOUND, 'This user is not found!');
