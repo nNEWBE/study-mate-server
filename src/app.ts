@@ -25,14 +25,18 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Security: CORS
-app.use(cors({
-    origin: [
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "https://study-mate-project.netlify.app",
-    ],
+origin: (origin, callback) => {
+    if (!origin ||
+        origin.startsWith('http://localhost') ||
+        origin.includes('.netlify.app') ||
+        origin.includes('.vercel.app')) {
+        callback(null, true);
+    } else {
+        callback(new Error('Not allowed by CORS'));
+    }
+},
     credentials: true,
-    optionsSuccessStatus: 200
+        optionsSuccessStatus: 200
 }));
 
 // Body parsers with size limits
