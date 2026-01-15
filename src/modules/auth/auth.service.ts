@@ -88,6 +88,7 @@ const refreshToken = async (token: string) => {
 
     return {
         accessToken,
+        user,
     };
 };
 
