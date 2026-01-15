@@ -39,6 +39,7 @@ const userSchema = new Schema<IUser, UserModel>({
         enum: ["google", "github", "email"],
         default: "email",
     },
+    socialId: { type: String, default: null },
 }, {
     timestamps: true,
 });

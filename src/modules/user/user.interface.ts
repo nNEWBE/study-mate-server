@@ -13,6 +13,7 @@ export interface IUser {
     isBlocked: boolean;
     profileImage?: string;
     provider?: "google" | "github" | "email";
+    socialId?: string | null;
 }
 
 

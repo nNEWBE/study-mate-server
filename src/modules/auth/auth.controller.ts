@@ -6,8 +6,8 @@ import config from "../../config";
 import { IImageFile } from "../../interface/ImageFile";
 
 const registerUser = catchAsync(async (req, res) => {
-    const { name, email, password, profileImageUrl, provider } = req.body;
-    const result = await AuthServices.regsiterUserIntoDB(name, email, password, profileImageUrl, provider);
+    const { name, email, password, profileImageUrl, provider, socialId } = req.body;
+    const result = await AuthServices.regsiterUserIntoDB(name, email, password, profileImageUrl, provider, socialId) as any;
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.CREATED,
@@ -91,8 +91,8 @@ const refreshToken = catchAsync(async (req, res) => {
 
 
 const socialLogin = catchAsync(async (req, res) => {
-    const { email } = req.body;
-    const { accessToken, refreshToken, user } = await AuthServices.socialLoginIntoDB(email);
+    const { email, socialId } = req.body;
+    const { accessToken, refreshToken, user } = await AuthServices.socialLoginIntoDB({ email, socialId });
 
     res.cookie('refreshToken', refreshToken, {
         secure: config.node_env === 'production',

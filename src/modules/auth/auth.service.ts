@@ -8,7 +8,7 @@ import { isUserExistsAndNotBlocked } from "../user/user.utils";
 import { uploadToCloudinary } from "../../utils/cloudinary";
 import { IImageFile } from "../../interface/ImageFile";
 
-const regsiterUserIntoDB = async (name: string, email: string, password: string, profileImageUrl?: string, provider?: string) => {
+const regsiterUserIntoDB = async (name: string, email: string, password: string, profileImageUrl?: string, provider?: string, socialId?: string) => {
     const isEmailExist = await User.isUserExistsByEmail(email);
     if (isEmailExist) {
         throw new AppError('email',
@@ -22,7 +22,8 @@ const regsiterUserIntoDB = async (name: string, email: string, password: string,
         email,
         password,
         profileImage: profileImageUrl || "N/A",
-        provider: provider || "email"
+        provider: provider || "email",
+        socialId: socialId || null
     })
 
     return result;
@@ -90,8 +91,16 @@ const refreshToken = async (token: string) => {
     };
 };
 
-const socialLoginIntoDB = async (email: string) => {
-    const user = await User.isUserExistsByEmail(email);
+const socialLoginIntoDB = async (payload: { email?: string, socialId?: string }) => {
+    let user = null;
+
+    if (payload.email) {
+        user = await User.isUserExistsByEmail(payload.email);
+    }
+
+    if (!user && payload.socialId) {
+        user = await User.findOne({ socialId: payload.socialId });
+    }
 
     if (!user) {
         throw new AppError("email", httpStatus.NOT_FOUND, 'User not found!');
