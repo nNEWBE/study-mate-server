@@ -1,4 +1,5 @@
 import httpStatus from "http-status";
+import { SignOptions } from "jsonwebtoken";
 import AppError from "../../errors/AppError";
 import { User } from "../user/user.model"
 import config from "../../config";
@@ -17,8 +18,8 @@ const regsiterUserIntoDB = async (name: string, email: string, password: string,
     }
 
     let profileImage: string | undefined;
-    if (file && file.path) {
-        profileImage = await uploadToCloudinary(file.path, 'study-mate/profiles');
+    if (file && file.buffer) {
+        profileImage = await uploadToCloudinary(file.buffer, 'study-mate/profiles');
     }
 
     const result = User.create({
@@ -51,13 +52,13 @@ const loginUserIntoDB = async (email: string, password: string) => {
     const accessToken = createToken(
         jwtPayload,
         config.jwt_access_secret as string,
-        config.jwt_access_expires_in as string,
+        config.jwt_access_expires_in as SignOptions["expiresIn"],
     );
 
     const refreshToken = createToken(
         jwtPayload,
         config.jwt_refresh_secret as string,
-        config.jwt_refresh_expires_in as string,
+        config.jwt_refresh_expires_in as SignOptions["expiresIn"],
     );
 
     return {
@@ -84,7 +85,7 @@ const refreshToken = async (token: string) => {
     const accessToken = createToken(
         jwtPayload,
         config.jwt_access_secret as string,
-        config.jwt_access_expires_in as string,
+        config.jwt_access_expires_in as SignOptions["expiresIn"],
     );
 
     return {

@@ -1,6 +1,5 @@
-import { v2 as cloudinary } from 'cloudinary';
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import config from '../config';
-import fs from 'fs';
 
 cloudinary.config({
     cloud_name: config.cloudinary_cloud_name as string,
@@ -8,19 +7,34 @@ cloudinary.config({
     api_secret: config.cloudinary_api_secret as string,
 });
 
+/**
+ * Upload a buffer to Cloudinary
+ * Works with memory storage (for serverless environments like Vercel)
+ */
 export const uploadToCloudinary = async (
-    filePath: string,
+    buffer: Buffer,
     folder: string = 'study-mate'
 ): Promise<string> => {
-    const result = await cloudinary.uploader.upload(filePath, {
-        folder: folder,
-        resource_type: 'image',
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: folder,
+                resource_type: 'image',
+            },
+            (error, result: UploadApiResponse | undefined) => {
+                if (error) {
+                    reject(error);
+                } else if (result) {
+                    resolve(result.secure_url);
+                } else {
+                    reject(new Error('Upload failed: No result returned'));
+                }
+            }
+        );
+
+        // Write buffer to the upload stream
+        uploadStream.end(buffer);
     });
-
-    // Delete local file after upload
-    fs.unlinkSync(filePath);
-
-    return result.secure_url;
 };
 
 export const deleteFromCloudinary = async (publicId: string): Promise<void> => {

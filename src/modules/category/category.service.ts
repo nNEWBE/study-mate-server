@@ -9,8 +9,8 @@ import httpStatus from 'http-status';
 
 const createCategory = async (payload: TCategory, file?: IImageFile) => {
     // Upload image to Cloudinary if provided
-    if (file && file.path) {
-        const imageUrl = await uploadToCloudinary(file.path, 'study-mate/categories');
+    if (file && file.buffer) {
+        const imageUrl = await uploadToCloudinary(file.buffer, 'study-mate/categories');
         payload.imageUrl = imageUrl;
     }
 
@@ -37,8 +37,8 @@ const getSingleCategory = async (id: string) => {
 
 const updateCategory = async (id: string, payload: Partial<TCategory>, file?: IImageFile) => {
     // Upload new image to Cloudinary if provided
-    if (file && file.path) {
-        const imageUrl = await uploadToCloudinary(file.path, 'study-mate/categories');
+    if (file && file.buffer) {
+        const imageUrl = await uploadToCloudinary(file.buffer, 'study-mate/categories');
         payload.imageUrl = imageUrl;
     }
 

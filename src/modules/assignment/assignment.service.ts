@@ -24,7 +24,7 @@ const createAssignment = async (payload: TAssignment, files?: IImageFile[], user
     const thumbnailUrls: string[] = [];
     if (files && files.length > 0) {
         for (const file of files) {
-            const url = await uploadToCloudinary(file.path, 'study-mate/assignments');
+            const url = await uploadToCloudinary(file.buffer, 'study-mate/assignments');
             thumbnailUrls.push(url);
         }
     }
@@ -70,7 +70,7 @@ const updateAssignment = async (id: string, payload: Partial<TAssignment>, files
     if (files && files.length > 0) {
         const thumbnailUrls: string[] = [];
         for (const file of files) {
-            const url = await uploadToCloudinary(file.path, 'study-mate/assignments');
+            const url = await uploadToCloudinary(file.buffer, 'study-mate/assignments');
             thumbnailUrls.push(url);
         }
         payload.thumbnailUrl = thumbnailUrls;

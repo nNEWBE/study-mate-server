@@ -20,9 +20,9 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
 const updateUserFromDB = async (id: string, body: Record<string, unknown>, file: IImageFile) => {
     const user = await User.isUserExistsById(id);
     isUserExistsAndNotBlocked(user);
-    if (file && file.path) {
+    if (file && file.buffer) {
         // Upload to Cloudinary and get URL
-        const cloudinaryUrl = await uploadToCloudinary(file.path, 'study-mate/profiles');
+        const cloudinaryUrl = await uploadToCloudinary(file.buffer, 'study-mate/profiles');
         body.profileImage = cloudinaryUrl;
     }
     const result = await User.findByIdAndUpdate(id, body, { new: true, runValidators: true });

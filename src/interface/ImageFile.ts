@@ -3,8 +3,11 @@ export interface IImageFile {
     originalname: string;
     encoding: string;
     mimetype: string;
-    destination: string;
-    filename: string;
-    path: string;
     size: number;
+    // Memory storage (serverless)
+    buffer: Buffer;
+    // Disk storage (optional - not available in serverless)
+    destination?: string;
+    filename?: string;
+    path?: string;
 }
