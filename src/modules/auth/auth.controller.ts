@@ -31,6 +31,13 @@ const loginUser = catchAsync(async (req, res) => {
         maxAge: Number(config.cookies_max_age),
     });
 
+    res.cookie('accessToken', accessToken, {
+        secure: config.node_env === 'production',
+        httpOnly: true,
+        sameSite: 'none',
+        maxAge: Number(config.cookies_max_age),
+    });
+
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,
@@ -45,6 +52,12 @@ const loginUser = catchAsync(async (req, res) => {
 
 const logoutUser = catchAsync(async (req, res) => {
     res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: config.node_env === "production",
+        sameSite: "none",
+    });
+
+    res.clearCookie("accessToken", {
         httpOnly: true,
         secure: config.node_env === "production",
         sameSite: "none",
