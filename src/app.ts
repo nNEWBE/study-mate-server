@@ -25,18 +25,19 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Security: CORS
-origin: (origin, callback) => {
-    if (!origin ||
-        origin.startsWith('http://localhost') ||
-        origin.includes('.netlify.app') ||
-        origin.includes('.vercel.app')) {
-        callback(null, true);
-    } else {
-        callback(new Error('Not allowed by CORS'));
-    }
-},
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin ||
+            origin.startsWith('http://localhost') ||
+            origin.includes('.netlify.app') ||
+            origin.includes('.vercel.app')) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
-        optionsSuccessStatus: 200
+    optionsSuccessStatus: 200
 }));
 
 // Body parsers with size limits

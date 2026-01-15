@@ -90,8 +90,44 @@ const refreshToken = async (token: string) => {
     };
 };
 
+const socialLoginIntoDB = async (email: string) => {
+    const user = await User.isUserExistsByEmail(email);
+
+    if (!user) {
+        throw new AppError("email", httpStatus.NOT_FOUND, 'User not found!');
+    }
+
+    isUserExistsAndNotBlocked(user);
+
+    const jwtPayload = {
+        userName: user.name,
+        userId: user.email,
+        role: user.role,
+        profileImage: user.profileImage
+    };
+
+    const accessToken = createToken(
+        jwtPayload,
+        config.jwt_access_secret as string,
+        config.jwt_access_expires_in as SignOptions["expiresIn"],
+    );
+
+    const refreshToken = createToken(
+        jwtPayload,
+        config.jwt_refresh_secret as string,
+        config.jwt_refresh_expires_in as SignOptions["expiresIn"],
+    );
+
+    return {
+        accessToken,
+        refreshToken,
+        user
+    }
+}
+
 export const AuthServices = {
     regsiterUserIntoDB,
     loginUserIntoDB,
-    refreshToken
+    refreshToken,
+    socialLoginIntoDB
 }

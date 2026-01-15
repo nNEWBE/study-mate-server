@@ -88,9 +88,42 @@ const refreshToken = catchAsync(async (req, res) => {
     });
 });
 
+
+
+const socialLogin = catchAsync(async (req, res) => {
+    const { email } = req.body;
+    const { accessToken, refreshToken, user } = await AuthServices.socialLoginIntoDB(email);
+
+    res.cookie('refreshToken', refreshToken, {
+        secure: config.node_env === 'production',
+        httpOnly: true,
+        sameSite: 'none',
+        maxAge: Number(config.cookies_max_age),
+    });
+
+    res.cookie('accessToken', accessToken, {
+        secure: config.node_env === 'production',
+        httpOnly: true,
+        sameSite: 'none',
+        maxAge: Number(config.cookies_max_age),
+    });
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'Login successful',
+        data: {
+            user,
+            accessToken,
+            refreshToken
+        }
+    });
+});
+
 export const AuthControllers = {
     registerUser,
     loginUser,
     logoutUser,
-    refreshToken
+    refreshToken,
+    socialLogin
 };
