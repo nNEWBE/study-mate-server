@@ -134,7 +134,7 @@
                             "formdata": [
                                 {
                                     "key": "data",
-                                    "value": "{\"title\": \"Advanced TS\", \"description\": \"Learn advanced typescript features\", \"marks\": 60, \"content\": \"# Markdown content\", \"difficulty\": \"medium\", \"dueDate\": \"2024-12-31\", \"createdBy\": {\"name\": \"Teacher Name\", \"email\": \"teacher@example.com\", \"role\": \"teacher\", \"profileImage\": \"\"}, \"categoryId\": \"CATEGORY_ID\"}",
+                                    "value": "{\"title\": \"Advanced TS\", \"description\": \"Learn advanced typescript features\", \"marks\": 60, \"content\": \"# Markdown content\", \"difficulty\": \"medium\", \"dueDate\": \"2024-12-31\", \"categoryId\": \"CATEGORY_ID\"}",
                                     "type": "text"
                                 },
                                 {

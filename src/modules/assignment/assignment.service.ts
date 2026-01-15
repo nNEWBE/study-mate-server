@@ -7,12 +7,18 @@ import { JwtPayload } from "jsonwebtoken";
 import { Category } from "../category/category.model";
 import AppError from "../../errors/AppError";
 import httpStatus from "http-status";
+import { User } from "../user/user.model";
 
 const createAssignment = async (payload: TAssignment, files?: IImageFile[], user?: JwtPayload) => {
-    // Check if category exists
     const category = await Category.findOne({ _id: payload.categoryId, isDeleted: false });
     if (!category) {
         throw new AppError('categoryId', httpStatus.BAD_REQUEST, 'Category not found. Please select a valid category.');
+    }
+
+    // Fetch user details from DB to set createdBy
+    const userDetails = await User.findById(user?._id);
+    if (!userDetails) {
+        throw new AppError('user', httpStatus.UNAUTHORIZED, 'User not found.');
     }
 
     const thumbnailUrls: string[] = [];
@@ -27,6 +33,12 @@ const createAssignment = async (payload: TAssignment, files?: IImageFile[], user
         ...payload,
         thumbnailUrl: thumbnailUrls,
         userId: user?._id,
+        createdBy: {
+            name: userDetails.name,
+            email: userDetails.email,
+            role: userDetails.role,
+            profileImage: userDetails.profileImage || '',
+        },
     });
     return result;
 };

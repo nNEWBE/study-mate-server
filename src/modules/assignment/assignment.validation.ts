@@ -8,12 +8,6 @@ const createAssignmentValidationSchema = z.object({
         content: z.string(),
         difficulty: z.enum(['easy', 'medium', 'hard']),
         dueDate: z.string().transform((str) => new Date(str)),
-        createdBy: z.object({
-            name: z.string(),
-            email: z.string().email(),
-            role: z.string(),
-            profileImage: z.string().optional(),
-        }),
         categoryId: z.string(),
     }),
 });
