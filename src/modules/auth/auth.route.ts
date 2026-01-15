@@ -10,8 +10,6 @@ const router = express.Router();
 
 router.post(
     '/register',
-    multerUpload.single('profileImage'),
-    parseBody,
     validateRequest(UserValidations.registerUserValidationSchema),
     AuthControllers.registerUser
 );

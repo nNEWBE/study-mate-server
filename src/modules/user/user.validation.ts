@@ -7,6 +7,8 @@ const registerUserValidationSchema = z.object({
         email: z.string().email(),
 
         password: z.string().min(4),
+        profileImageUrl: z.string().optional(),
+        provider: z.enum(["google", "github", "email"]).optional(),
     })
 })
 

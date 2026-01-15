@@ -34,6 +34,11 @@ const userSchema = new Schema<IUser, UserModel>({
         default: false,
     },
     profileImage: { type: String, default: "N/A" },
+    provider: {
+        type: String,
+        enum: ["google", "github", "email"],
+        default: "email",
+    },
 }, {
     timestamps: true,
 });

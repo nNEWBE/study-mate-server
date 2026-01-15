@@ -8,7 +8,7 @@ import { isUserExistsAndNotBlocked } from "../user/user.utils";
 import { uploadToCloudinary } from "../../utils/cloudinary";
 import { IImageFile } from "../../interface/ImageFile";
 
-const regsiterUserIntoDB = async (name: string, email: string, password: string, file?: IImageFile) => {
+const regsiterUserIntoDB = async (name: string, email: string, password: string, profileImageUrl?: string, provider?: string) => {
     const isEmailExist = await User.isUserExistsByEmail(email);
     if (isEmailExist) {
         throw new AppError('email',
@@ -17,16 +17,12 @@ const regsiterUserIntoDB = async (name: string, email: string, password: string,
         );
     }
 
-    let profileImage: string | undefined;
-    if (file && file.buffer) {
-        profileImage = await uploadToCloudinary(file.buffer, 'study-mate/profiles');
-    }
-
     const result = User.create({
         name,
         email,
         password,
-        ...(profileImage && { profileImage })
+        profileImage: profileImageUrl || "N/A",
+        provider: provider || "email"
     })
 
     return result;
@@ -63,7 +59,8 @@ const loginUserIntoDB = async (email: string, password: string) => {
 
     return {
         accessToken,
-        refreshToken
+        refreshToken,
+        user
     }
 
 }

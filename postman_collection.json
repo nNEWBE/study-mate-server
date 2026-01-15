@@ -15,19 +15,13 @@
                         "method": "POST",
                         "header": [],
                         "body": {
-                            "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "data",
-                                    "value": "{\"name\": \"Test User\", \"email\": \"test@example.com\", \"password\": \"password123\"}",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "profileImage",
-                                    "type": "file",
-                                    "src": ""
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"profileImageUrl\": \"https://example.com/image.png\",\n    \"provider\": \"email\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
                                 }
-                            ]
+                            }
                         },
                         "url": {
                             "raw": "{{baseUrl}}/register",
@@ -56,12 +50,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/auth/login",
+                            "raw": "{{baseUrl}}/login",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "auth",
                                 "login"
                             ]
                         }
@@ -83,12 +76,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/auth/refresh-token",
+                            "raw": "{{baseUrl}}/refresh-token",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "auth",
                                 "refresh-token"
                             ]
                         }
@@ -101,12 +93,11 @@
                         "method": "POST",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/auth/logout",
+                            "raw": "{{baseUrl}}/logout",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "auth",
                                 "logout"
                             ]
                         }

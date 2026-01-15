@@ -6,9 +6,8 @@ import config from "../../config";
 import { IImageFile } from "../../interface/ImageFile";
 
 const registerUser = catchAsync(async (req, res) => {
-    const { name, email, password } = req.body;
-    const file = req.file as IImageFile | undefined;
-    const result = await AuthServices.regsiterUserIntoDB(name, email, password, file);
+    const { name, email, password, profileImageUrl, provider } = req.body;
+    const result = await AuthServices.regsiterUserIntoDB(name, email, password, profileImageUrl, provider);
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.CREATED,
@@ -23,7 +22,7 @@ const registerUser = catchAsync(async (req, res) => {
 
 const loginUser = catchAsync(async (req, res) => {
     const { email, password } = req.body;
-    const { accessToken, refreshToken } = await AuthServices.loginUserIntoDB(email, password);
+    const { accessToken, refreshToken, user } = await AuthServices.loginUserIntoDB(email, password);
 
     res.cookie('refreshToken', refreshToken, {
         secure: config.node_env === 'production',
@@ -37,10 +36,9 @@ const loginUser = catchAsync(async (req, res) => {
         statusCode: httpStatus.OK,
         message: 'Login successful',
         data: {
-            token: {
-                accessToken,
-                refreshToken
-            }
+            user,
+            accessToken,
+            refreshToken
         }
     });
 })

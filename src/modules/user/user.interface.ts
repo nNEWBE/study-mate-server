@@ -12,6 +12,7 @@ export interface IUser {
     city?: string;
     isBlocked: boolean;
     profileImage?: string;
+    provider?: "google" | "github" | "email";
 }
 
 
