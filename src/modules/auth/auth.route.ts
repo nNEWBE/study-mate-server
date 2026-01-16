@@ -23,6 +23,7 @@ router.post(
     validateRequest(AuthValidation.refreshTokenValidationSchema),
     AuthControllers.refreshToken
 );
+router.get('/check-user', AuthControllers.checkUserExists);
 router.post('/logout', AuthControllers.logoutUser);
 
 export const AuthRoutes = router;

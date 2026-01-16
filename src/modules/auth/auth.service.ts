@@ -5,51 +5,51 @@ import { User } from "../user/user.model"
 import config from "../../config";
 import { createToken, verifyToken } from "./auth.utils";
 import { isUserExistsAndNotBlocked } from "../user/user.utils";
-import { uploadToCloudinary } from "../../utils/cloudinary";
-import { IImageFile } from "../../interface/ImageFile";
 import bcrypt from 'bcrypt';
 
-const regsiterUserIntoDB = async (name: string, email: string, password: string, profileImageUrl?: string, provider?: string) => {
+const regsiterUserIntoDB = async (name: string, email: string, password?: string, profileImageUrl?: string, provider?: string) => {
     const existingUser = await User.isUserExistsByEmail(email);
 
     // Convert provider to new format (use 'password' instead of 'email')
     const newProvider = provider === 'email' ? 'password' : (provider || 'password');
 
     if (existingUser) {
-        // If user exists, check if they're trying to add a new provider
+        // User with this email already exists
         const currentProviders = existingUser.providers || [];
 
-        // If user already has 'password' provider and trying to register with password again - error
-        if (newProvider === 'password' && currentProviders.includes('password')) {
-            throw new AppError('email',
-                httpStatus.BAD_REQUEST,
-                `${email} already exists with password login!`,
-            );
-        }
-
-        // If this provider already exists for this user - error
+        // Check if this provider already exists for this user
         if (currentProviders.includes(newProvider as "google" | "github" | "password")) {
-            throw new AppError('email',
-                httpStatus.BAD_REQUEST,
-                `${email} already exists with ${newProvider} login!`,
-            );
+            // New Requirement: If trying to register with password again, throw error.
+            if (newProvider === 'password') {
+                throw new AppError("email", httpStatus.CONFLICT, "User with this email already exists!");
+            }
+
+            // Provider already exists - just return the user (no error)
+            // This allows idempotent registration calls for social logins
+            console.log(`User ${email} already has ${newProvider} provider. Returning existing user.`);
+            return existingUser;
         }
 
-        // Add new provider to existing user
+        // NEW PROVIDER - Add it to the existing user's providers array
+        console.log(`Adding ${newProvider} provider to existing user ${email}`);
+
         const updatedProviders = [...currentProviders, newProvider];
         const updateData: any = { providers: updatedProviders };
 
-        // If this is password registration, also update password
+        // If this is password registration, also update/set password
         if (newProvider === 'password' && password) {
             const hashedPassword = await bcrypt.hash(password, Number(config.bcrypt_salt_rounds));
             updateData.password = hashedPassword;
         }
 
-
-
-        // Update profile image if not already set
+        // Update profile image if not already set (keep existing if already set)
         if (profileImageUrl && existingUser.profileImage === "N/A") {
             updateData.profileImage = profileImageUrl;
+        }
+
+        // Update name if not already set properly
+        if (name && existingUser.name === "N/A") {
+            updateData.name = name;
         }
 
         const updatedUser = await User.findByIdAndUpdate(
@@ -58,6 +58,7 @@ const regsiterUserIntoDB = async (name: string, email: string, password: string,
             { new: true }
         );
 
+        console.log(`Successfully added ${newProvider} to user ${email}. Providers: ${updatedProviders}`);
         return updatedUser;
     }
 
@@ -154,8 +155,32 @@ const refreshToken = async (token: string) => {
     };
 };
 
+// Check if user exists with a specific provider
+const checkUserExists = async (email: string, provider: string) => {
+    const user = await User.isUserExistsByEmail(email);
+
+    if (!user) {
+        return {
+            exists: false,
+            hasProvider: false,
+            providers: []
+        };
+    }
+
+    const normalizedProvider = provider === 'email' ? 'password' : provider;
+    const currentProviders = user.providers || [];
+    const hasProvider = currentProviders.includes(normalizedProvider as "google" | "github" | "password");
+
+    return {
+        exists: true,
+        hasProvider,
+        providers: currentProviders
+    };
+};
+
 export const AuthServices = {
     regsiterUserIntoDB,
     loginUserIntoDB,
-    refreshToken
+    refreshToken,
+    checkUserExists
 }

@@ -23,19 +23,18 @@ const loginUser = catchAsync(async (req, res) => {
     const { email, password } = req.body;
     const { accessToken, refreshToken, user } = await AuthServices.loginUserIntoDB(email, password);
 
-    res.cookie('refreshToken', refreshToken, {
-        secure: config.node_env === 'production',
+    // Cross-origin cookies require secure:true and sameSite:'none'
+    // This is required when frontend and backend are on different domains (both HTTPS)
+    const cookieOptions = {
+        secure: true,
         httpOnly: true,
-        sameSite: 'none',
-        maxAge: Number(config.cookies_max_age),
-    });
+        sameSite: 'none' as const,
+        maxAge: Number(config.cookies_max_age) || 365 * 24 * 60 * 60 * 1000,
+    };
 
-    res.cookie('accessToken', accessToken, {
-        secure: config.node_env === 'production',
-        httpOnly: true,
-        sameSite: 'none',
-        maxAge: Number(config.cookies_max_age),
-    });
+    res.cookie('refreshToken', refreshToken, cookieOptions);
+
+    res.cookie('accessToken', accessToken, cookieOptions);
 
     sendResponse(res, {
         success: true,
@@ -52,13 +51,13 @@ const loginUser = catchAsync(async (req, res) => {
 const logoutUser = catchAsync(async (req, res) => {
     res.clearCookie("refreshToken", {
         httpOnly: true,
-        secure: config.node_env === "production",
+        secure: true,
         sameSite: "none",
     });
 
     res.clearCookie("accessToken", {
         httpOnly: true,
-        secure: config.node_env === "production",
+        secure: true,
         sameSite: "none",
     });
 
@@ -86,9 +85,33 @@ const refreshToken = catchAsync(async (req, res) => {
     });
 });
 
+// Check if user exists with a specific provider
+const checkUserExists = catchAsync(async (req, res) => {
+    const { email, provider } = req.query;
+
+    if (!email || typeof email !== 'string') {
+        return sendResponse(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'Email is required',
+            data: null
+        });
+    }
+
+    const result = await AuthServices.checkUserExists(email, provider as string || 'password');
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'User check completed',
+        data: result
+    });
+});
+
 export const AuthControllers = {
     registerUser,
     loginUser,
     logoutUser,
-    refreshToken
+    refreshToken,
+    checkUserExists
 };

@@ -6,16 +6,27 @@ const registerUserValidationSchema = z.object({
 
         email: z.string().email(),
 
-        password: z.string().min(4),
+        // Password is optional for social login (google/github)
+        password: z.string().optional(),
         profileImageUrl: z.string().optional(),
-        provider: z.enum(["google", "github", "email"]).optional(),
+        provider: z.enum(["google", "github", "email", "password"]).optional(),
+    }).refine((data) => {
+        // If provider is 'password' or 'email' or not specified, password is required
+        if (!data.provider || data.provider === 'password' || data.provider === 'email') {
+            return data.password && data.password.length >= 4;
+        }
+        // For google/github, password is not required
+        return true;
+    }, {
+        message: "Password must be at least 4 characters for email/password registration",
+        path: ["password"],
     })
 })
 
 const loginUserValidationSchema = z.object({
-    body: registerUserValidationSchema.shape.body.pick({
-        email: true,
-        password: true
+    body: z.object({
+        email: z.string().email(),
+        password: z.string().optional(), // Optional for social login
     })
 });
 
