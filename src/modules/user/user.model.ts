@@ -13,12 +13,11 @@ const userSchema = new Schema<IUser, UserModel>({
         type: String,
         immutable: true,
         required: true,
-        unique: true,
         trim: true,
     },
     password: {
         type: String,
-        required: true,
+        required: false, // Optional for social login users
         select: false,
     },
     role: {
@@ -34,21 +33,23 @@ const userSchema = new Schema<IUser, UserModel>({
         default: false,
     },
     profileImage: { type: String, default: "N/A" },
-    provider: {
-        type: String,
-        enum: ["google", "github", "email"],
-        default: "email",
+    providers: {
+        type: [String],
+        enum: ["google", "github", "password"],
+        default: ["password"],
     },
-    socialId: { type: String, default: null },
 }, {
     timestamps: true,
 });
 
+// Only hash password if it exists and is modified
 userSchema.pre('save', async function () {
-    this.password = await bcrypt.hash(
-        this.password,
-        Number(config.bcrypt_salt_rounds),
-    );
+    if (this.password && this.isModified('password')) {
+        this.password = await bcrypt.hash(
+            this.password,
+            Number(config.bcrypt_salt_rounds),
+        );
+    }
 });
 
 userSchema.statics.isUserExistsByEmail = async function (email: string) {

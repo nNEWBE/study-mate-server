@@ -7,36 +7,98 @@ import { createToken, verifyToken } from "./auth.utils";
 import { isUserExistsAndNotBlocked } from "../user/user.utils";
 import { uploadToCloudinary } from "../../utils/cloudinary";
 import { IImageFile } from "../../interface/ImageFile";
+import bcrypt from 'bcrypt';
 
-const regsiterUserIntoDB = async (name: string, email: string, password: string, profileImageUrl?: string, provider?: string, socialId?: string) => {
-    const isEmailExist = await User.isUserExistsByEmail(email);
-    if (isEmailExist) {
-        throw new AppError('email',
-            httpStatus.BAD_REQUEST,
-            `${email} already exists!`,
+const regsiterUserIntoDB = async (name: string, email: string, password: string, profileImageUrl?: string, provider?: string) => {
+    const existingUser = await User.isUserExistsByEmail(email);
+
+    // Convert provider to new format (use 'password' instead of 'email')
+    const newProvider = provider === 'email' ? 'password' : (provider || 'password');
+
+    if (existingUser) {
+        // If user exists, check if they're trying to add a new provider
+        const currentProviders = existingUser.providers || [];
+
+        // If user already has 'password' provider and trying to register with password again - error
+        if (newProvider === 'password' && currentProviders.includes('password')) {
+            throw new AppError('email',
+                httpStatus.BAD_REQUEST,
+                `${email} already exists with password login!`,
+            );
+        }
+
+        // If this provider already exists for this user - error
+        if (currentProviders.includes(newProvider as "google" | "github" | "password")) {
+            throw new AppError('email',
+                httpStatus.BAD_REQUEST,
+                `${email} already exists with ${newProvider} login!`,
+            );
+        }
+
+        // Add new provider to existing user
+        const updatedProviders = [...currentProviders, newProvider];
+        const updateData: any = { providers: updatedProviders };
+
+        // If this is password registration, also update password
+        if (newProvider === 'password' && password) {
+            const hashedPassword = await bcrypt.hash(password, Number(config.bcrypt_salt_rounds));
+            updateData.password = hashedPassword;
+        }
+
+
+
+        // Update profile image if not already set
+        if (profileImageUrl && existingUser.profileImage === "N/A") {
+            updateData.profileImage = profileImageUrl;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            existingUser._id,
+            updateData,
+            { new: true }
         );
+
+        return updatedUser;
     }
 
-    const result = User.create({
+    // New user - create with the provider
+    const createData: any = {
         name,
         email,
-        password,
         profileImage: profileImageUrl || "N/A",
-        provider: provider || "email",
-        socialId: socialId || null
-    })
+        providers: [newProvider as "google" | "github" | "password"]
+    };
+
+    // Only add password if provider is 'password'
+    if (newProvider === 'password' && password) {
+        createData.password = password;
+    }
+
+    const result = User.create(createData);
 
     return result;
 }
 
-const loginUserIntoDB = async (email: string, password: string) => {
+const loginUserIntoDB = async (email: string, password?: string) => {
     const user = await User.isUserExistsByEmail(email);
 
     isUserExistsAndNotBlocked(user);
 
-    const isPasswordMatched = await User.isPasswordMatched(password, user.password);
-    if (!isPasswordMatched) {
-        throw new AppError("password", httpStatus.UNAUTHORIZED, 'Password does not match !!');
+    // If password is provided, validate it (email/password login)
+    if (password) {
+        // Check if user has password provider
+        if (!user.providers?.includes('password')) {
+            throw new AppError("password", httpStatus.BAD_REQUEST, 'This account was created with social login. Please use Google or GitHub to login.');
+        }
+
+        if (!user.password) {
+            throw new AppError("password", httpStatus.BAD_REQUEST, 'No password set for this account. Please use social login.');
+        }
+
+        const isPasswordMatched = await User.isPasswordMatched(password, user.password);
+        if (!isPasswordMatched) {
+            throw new AppError("password", httpStatus.UNAUTHORIZED, 'Password does not match !!');
+        }
     }
 
     const jwtPayload = {
@@ -92,52 +154,8 @@ const refreshToken = async (token: string) => {
     };
 };
 
-const socialLoginIntoDB = async (payload: { email?: string, socialId?: string }) => {
-    let user = null;
-
-    if (payload.email) {
-        user = await User.isUserExistsByEmail(payload.email);
-    }
-
-    if (!user && payload.socialId) {
-        user = await User.findOne({ socialId: payload.socialId });
-    }
-
-    if (!user) {
-        throw new AppError("email", httpStatus.NOT_FOUND, 'User not found!');
-    }
-
-    isUserExistsAndNotBlocked(user);
-
-    const jwtPayload = {
-        userName: user.name,
-        userId: user.email,
-        role: user.role,
-        profileImage: user.profileImage
-    };
-
-    const accessToken = createToken(
-        jwtPayload,
-        config.jwt_access_secret as string,
-        config.jwt_access_expires_in as SignOptions["expiresIn"],
-    );
-
-    const refreshToken = createToken(
-        jwtPayload,
-        config.jwt_refresh_secret as string,
-        config.jwt_refresh_expires_in as SignOptions["expiresIn"],
-    );
-
-    return {
-        accessToken,
-        refreshToken,
-        user
-    }
-}
-
 export const AuthServices = {
     regsiterUserIntoDB,
     loginUserIntoDB,
-    refreshToken,
-    socialLoginIntoDB
+    refreshToken
 }

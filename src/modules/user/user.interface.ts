@@ -3,17 +3,17 @@ import { Model, Types } from "mongoose";
 import { USER_ROLE } from "./user.constant";
 
 export interface IUser {
+    _id?: Types.ObjectId;
     name: string;
     email: string;
-    password: string;
+    password?: string; // Optional - social login users might not have password
     role: "admin" | "student" | "teacher";
     phone?: string;
     address?: string;
     city?: string;
     isBlocked: boolean;
     profileImage?: string;
-    provider?: "google" | "github" | "email";
-    socialId?: string | null;
+    providers: ("google" | "github" | "password")[]; // Array of providers
 }
 
 

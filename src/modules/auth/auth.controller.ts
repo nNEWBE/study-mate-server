@@ -3,11 +3,10 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import config from "../../config";
-import { IImageFile } from "../../interface/ImageFile";
 
 const registerUser = catchAsync(async (req, res) => {
-    const { name, email, password, profileImageUrl, provider, socialId } = req.body;
-    const result = await AuthServices.regsiterUserIntoDB(name, email, password, profileImageUrl, provider, socialId) as any;
+    const { name, email, password, profileImageUrl, provider } = req.body;
+    const result = await AuthServices.regsiterUserIntoDB(name, email, password, profileImageUrl, provider) as any;
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.CREATED,
@@ -87,42 +86,9 @@ const refreshToken = catchAsync(async (req, res) => {
     });
 });
 
-
-
-const socialLogin = catchAsync(async (req, res) => {
-    const { email, socialId } = req.body;
-    const { accessToken, refreshToken, user } = await AuthServices.socialLoginIntoDB({ email, socialId });
-
-    res.cookie('refreshToken', refreshToken, {
-        secure: config.node_env === 'production',
-        httpOnly: true,
-        sameSite: 'none',
-        maxAge: Number(config.cookies_max_age),
-    });
-
-    res.cookie('accessToken', accessToken, {
-        secure: config.node_env === 'production',
-        httpOnly: true,
-        sameSite: 'none',
-        maxAge: Number(config.cookies_max_age),
-    });
-
-    sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.OK,
-        message: 'Login successful',
-        data: {
-            user,
-            accessToken,
-            refreshToken
-        }
-    });
-});
-
 export const AuthControllers = {
     registerUser,
     loginUser,
     logoutUser,
-    refreshToken,
-    socialLogin
+    refreshToken
 };
