@@ -92,7 +92,11 @@ const getSingleAssignment = async (id: string) => {
 };
 
 const deleteAssignment = async (id: string) => {
-    const result = await Assignment.findByIdAndDelete(id);
+    const result = await Assignment.findByIdAndUpdate(
+        id,
+        { isDeleted: true, deletedAt: new Date() },
+        { new: true }
+    );
     return result;
 };
 
@@ -252,6 +256,69 @@ const addReview = async (id: string, user: JwtPayload | undefined, rating: numbe
     return result;
 };
 
+// Get deleted assignments (Recycle Bin) - Admin only
+const getDeletedAssignments = async (query: Record<string, unknown>) => {
+    // First, permanently delete items older than 30 days
+    await cleanupExpiredDeletedAssignments();
+
+    // Use the model directly without middleware filtering
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const assignmentQuery = new QueryBuilder(
+        Assignment.find({ isDeleted: true, deletedAt: { $gte: thirtyDaysAgo } }).populate('categoryId').setOptions({ skipMiddleware: true }),
+        query
+    )
+        .search(['title', 'description'])
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+
+    // Override the middleware filter
+    assignmentQuery.modelQuery.where({ isDeleted: true });
+
+    const result = await Assignment.find({ isDeleted: true, deletedAt: { $gte: thirtyDaysAgo } }).populate('categoryId');
+    return result;
+};
+
+// Restore a deleted assignment - Admin only
+const restoreAssignment = async (id: string) => {
+    const assignment = await Assignment.findOne({ _id: id, isDeleted: true });
+    if (!assignment) {
+        throw new AppError('assignmentId', httpStatus.NOT_FOUND, 'Deleted assignment not found');
+    }
+
+    const result = await Assignment.findByIdAndUpdate(
+        id,
+        { isDeleted: false, $unset: { deletedAt: 1 } },
+        { new: true }
+    );
+    return result;
+};
+
+// Permanently delete an assignment - Admin only
+const permanentDeleteAssignment = async (id: string) => {
+    const assignment = await Assignment.findOne({ _id: id, isDeleted: true });
+    if (!assignment) {
+        throw new AppError('assignmentId', httpStatus.NOT_FOUND, 'Deleted assignment not found');
+    }
+
+    const result = await Assignment.findByIdAndDelete(id);
+    return result;
+};
+
+// Cleanup: Permanently delete assignments that have been in recycle bin for more than 30 days
+const cleanupExpiredDeletedAssignments = async () => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    await Assignment.deleteMany({
+        isDeleted: true,
+        deletedAt: { $lt: thirtyDaysAgo }
+    });
+};
+
 export const AssignmentServices = {
     createAssignment,
     getAllAssignments,
@@ -263,4 +330,8 @@ export const AssignmentServices = {
     decrementSubmissionCount,
     getBestAssignments,
     addReview,
+    getDeletedAssignments,
+    restoreAssignment,
+    permanentDeleteAssignment,
+    cleanupExpiredDeletedAssignments,
 };

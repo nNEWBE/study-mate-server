@@ -58,8 +58,57 @@ const deleteCategory = async (id: string) => {
         );
     }
 
-    const result = await Category.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
+    const result = await Category.findByIdAndUpdate(id, { isDeleted: true, deletedAt: new Date() }, { new: true });
     return result;
+};
+
+// Get deleted categories (Recycle Bin) - Admin only
+const getDeletedCategories = async (query: Record<string, unknown>) => {
+    // First, permanently delete items older than 30 days
+    await cleanupExpiredDeletedCategories();
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const result = await Category.find({ isDeleted: true, deletedAt: { $gte: thirtyDaysAgo } });
+    return result;
+};
+
+// Restore a deleted category - Admin only
+const restoreCategory = async (id: string) => {
+    const category = await Category.findOne({ _id: id, isDeleted: true });
+    if (!category) {
+        throw new AppError('categoryId', httpStatus.NOT_FOUND, 'Deleted category not found');
+    }
+
+    const result = await Category.findByIdAndUpdate(
+        id,
+        { isDeleted: false, $unset: { deletedAt: 1 } },
+        { new: true }
+    );
+    return result;
+};
+
+// Permanently delete a category - Admin only
+const permanentDeleteCategory = async (id: string) => {
+    const category = await Category.findOne({ _id: id, isDeleted: true });
+    if (!category) {
+        throw new AppError('categoryId', httpStatus.NOT_FOUND, 'Deleted category not found');
+    }
+
+    const result = await Category.findByIdAndDelete(id);
+    return result;
+};
+
+// Cleanup: Permanently delete categories that have been in recycle bin for more than 30 days
+const cleanupExpiredDeletedCategories = async () => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    await Category.deleteMany({
+        isDeleted: true,
+        deletedAt: { $lt: thirtyDaysAgo }
+    });
 };
 
 export const CategoryServices = {
@@ -68,4 +117,8 @@ export const CategoryServices = {
     getSingleCategory,
     updateCategory,
     deleteCategory,
+    getDeletedCategories,
+    restoreCategory,
+    permanentDeleteCategory,
+    cleanupExpiredDeletedCategories,
 };

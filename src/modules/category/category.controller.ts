@@ -59,10 +59,48 @@ const deleteCategory = catchAsync(async (req, res) => {
     });
 });
 
+// Get deleted categories (Recycle Bin) - Admin only
+const getDeletedCategories = catchAsync(async (req, res) => {
+    const result = await CategoryServices.getDeletedCategories(req.query);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Deleted categories retrieved successfully',
+        data: result,
+    });
+});
+
+// Restore a deleted category - Admin only
+const restoreCategory = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const result = await CategoryServices.restoreCategory(id as string);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Category restored successfully',
+        data: result,
+    });
+});
+
+// Permanently delete a category - Admin only
+const permanentDeleteCategory = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const result = await CategoryServices.permanentDeleteCategory(id as string);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Category permanently deleted',
+        data: result,
+    });
+});
+
 export const CategoryControllers = {
     createCategory,
     getAllCategories,
     getSingleCategory,
     updateCategory,
     deleteCategory,
+    getDeletedCategories,
+    restoreCategory,
+    permanentDeleteCategory,
 };

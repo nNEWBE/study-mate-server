@@ -50,4 +50,23 @@ router.patch(
     AssignmentControllers.toggleBestAssignment
 );
 
+// Recycle Bin Routes - Admin only
+router.get(
+    '/recycle-bin',
+    auth(USER_ROLE.admin),
+    AssignmentControllers.getDeletedAssignments
+);
+
+router.patch(
+    '/recycle-bin/:id/restore',
+    auth(USER_ROLE.admin),
+    AssignmentControllers.restoreAssignment
+);
+
+router.delete(
+    '/recycle-bin/:id/permanent',
+    auth(USER_ROLE.admin),
+    AssignmentControllers.permanentDeleteAssignment
+);
+
 export const AssignmentRoutes = router;

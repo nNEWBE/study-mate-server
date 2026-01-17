@@ -33,4 +33,23 @@ router.patch(
 
 router.delete('/:id', auth(USER_ROLE.admin), CategoryControllers.deleteCategory);
 
+// Recycle Bin Routes - Admin only
+router.get(
+    '/recycle-bin',
+    auth(USER_ROLE.admin),
+    CategoryControllers.getDeletedCategories
+);
+
+router.patch(
+    '/recycle-bin/:id/restore',
+    auth(USER_ROLE.admin),
+    CategoryControllers.restoreCategory
+);
+
+router.delete(
+    '/recycle-bin/:id/permanent',
+    auth(USER_ROLE.admin),
+    CategoryControllers.permanentDeleteCategory
+);
+
 export const CategoryRoutes = router;

@@ -3,4 +3,5 @@ export type TCategory = {
     imageUrl: string;
     color: string;
     isDeleted: boolean;
+    deletedAt?: Date;
 };

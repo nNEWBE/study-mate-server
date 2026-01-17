@@ -31,4 +31,6 @@ export type TAssignment = {
     };
     userId?: Types.ObjectId;
     categoryId: Types.ObjectId;
+    isDeleted: boolean;
+    deletedAt?: Date;
 };

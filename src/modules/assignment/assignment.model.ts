@@ -9,7 +9,7 @@ const reviewSchema = new Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-const assignmentSchema = new Schema<TAssignment>({
+const assignmentSchema = new Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
     marks: { type: Number, required: true },
@@ -30,9 +30,24 @@ const assignmentSchema = new Schema<TAssignment>({
         profileImage: { type: String, required: true }
     },
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
-    categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true }
+    categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date }
 }, {
     timestamps: true,
+});
+
+// Query Middleware to filter out deleted documents
+assignmentSchema.pre('find', function () {
+    this.where({ isDeleted: { $ne: true } });
+});
+
+assignmentSchema.pre('findOne', function () {
+    this.where({ isDeleted: { $ne: true } });
+});
+
+assignmentSchema.pre('aggregate', function () {
+    this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
 });
 
 // Indexes
@@ -41,6 +56,7 @@ assignmentSchema.index({ "createdBy.email": 1 });
 assignmentSchema.index({ dueDate: 1 });
 assignmentSchema.index({ isExpired: 1 });
 assignmentSchema.index({ isBestAssignment: 1 });
+assignmentSchema.index({ isDeleted: 1, deletedAt: 1 });
 
 // Virtual to check if assignment is expired based on current time
 assignmentSchema.methods.checkExpired = function (): boolean {

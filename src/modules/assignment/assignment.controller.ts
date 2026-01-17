@@ -108,6 +108,45 @@ const addReview = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+// Get deleted assignments (Recycle Bin) - Admin only
+const getDeletedAssignments = catchAsync(async (req: Request, res: Response) => {
+    const result = await AssignmentServices.getDeletedAssignments(req.query);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Deleted assignments retrieved successfully',
+        data: result,
+    });
+});
+
+// Restore a deleted assignment - Admin only
+const restoreAssignment = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    if (!id) throw new Error("ID is required");
+
+    const result = await AssignmentServices.restoreAssignment(id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Assignment restored successfully',
+        data: result,
+    });
+});
+
+// Permanently delete an assignment - Admin only
+const permanentDeleteAssignment = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    if (!id) throw new Error("ID is required");
+
+    const result = await AssignmentServices.permanentDeleteAssignment(id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Assignment permanently deleted',
+        data: result,
+    });
+});
+
 
 export const AssignmentControllers = {
     createAssignment,
@@ -118,4 +157,7 @@ export const AssignmentControllers = {
     toggleBestAssignment,
     getBestAssignments,
     addReview,
+    getDeletedAssignments,
+    restoreAssignment,
+    permanentDeleteAssignment,
 };
