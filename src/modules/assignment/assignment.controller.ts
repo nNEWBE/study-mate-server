@@ -64,10 +64,58 @@ const updateAssignment = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+// Toggle best assignment status (Admin only)
+const toggleBestAssignment = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { isBest } = req.body;
+
+    if (!id) throw new Error("ID is required");
+    if (typeof isBest !== 'boolean') throw new Error("isBest must be a boolean");
+
+    const result = await AssignmentServices.toggleBestAssignment(id, isBest);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: `Assignment ${isBest ? 'marked as best' : 'removed from best'}`,
+        data: result,
+    });
+});
+
+// Get best assignments only
+const getBestAssignments = catchAsync(async (req: Request, res: Response) => {
+    const result = await AssignmentServices.getBestAssignments();
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Best assignments retrieved successfully',
+        data: result,
+    });
+});
+
+const addReview = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { rating, feedback } = req.body;
+    const user = req.user;
+
+    if (!id) throw new Error("ID is required");
+
+    const result = await AssignmentServices.addReview(id, user, rating, feedback);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Review added successfully',
+        data: result,
+    });
+});
+
+
 export const AssignmentControllers = {
     createAssignment,
     getAllAssignments,
     getSingleAssignment,
     deleteAssignment,
     updateAssignment,
+    toggleBestAssignment,
+    getBestAssignments,
+    addReview,
 };
